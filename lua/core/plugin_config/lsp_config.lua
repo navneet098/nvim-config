@@ -1,5 +1,5 @@
 require("mason-lspconfig").setup({
-  ensure_installed = { "lua_ls", "solargraph", "tsserver" }
+  ensure_installed = { "lua_ls", "tsserver" }
 })
 
 local lspconfig = require('lspconfig')
@@ -11,6 +11,17 @@ lsp_defaults.capabilities = vim.tbl_deep_extend(
   lsp_defaults.capabilities,
   require('cmp_nvim_lsp').default_capabilities()
 )
+local on_attach=lsp_defaults.on_attach
+local capabilities=lsp_defaults.capabilities
+-- Configure Clangd as the language server for C++
+lspconfig.clangd.setup {
+  on_attach = function(client, bufnr)
+    client.server_capabilities.signatureHelpProvider = false
+    on_attach(client , bufnr)
+    -- Set up keybindings or any additional configuration here
+  end,
+  capabilities=capabilities,
+}
 
 require("lspconfig").lua_ls.setup {
   settings = {
@@ -37,7 +48,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     -- Enable completion triggered by <c-x><c-o>
     vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
 
-    -- Buffer local mappings.
+    -- Buffer local mapping
     -- See `:help vim.lsp.*` for documentation on any of the below functions
     local opts = { buffer = ev.buf }
     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
